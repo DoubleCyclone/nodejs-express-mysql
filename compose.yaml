@@ -1,0 +1,61 @@
+# services:
+#   app:
+#     build:
+#       context: .
+#     ports:
+#       - "8080:8080"
+#     environment:
+#       DB_HOST: "mysqldb"
+#       DB_USER: "basic_user"
+#       DB_PASSWORD: "1234asdf*"
+#       DB_NAME: "nodejs_project"
+#     depends_on:
+#       - mysqldb
+
+#   mysqldb:
+#     image: mysql:8.0
+#     ports:
+#       - "3307:3306"
+#     environment:
+#       MYSQL_ROOT_PASSWORD: "8RandomGuy8*"
+#       MYSQL_DATABASE: "nodejs_project"
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+
+# volumes:
+#   mysql_data:
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+       MYSQL_ROOT_PASSWORD: '8RandomGuy8*'
+       MYSQL_DATABASE: 'nodejs_project'
+       MYSQL_USER: 'basic_user'
+       MYSQL_PASSWORD: '1234asdf*'
+    ports:
+      - 3308:3306
+    networks:
+      - auth-networks
+
+  server:
+    build:
+      context: .
+    depends_on:
+      - mysqldb
+    restart: unless-stopped
+    environment:
+      - DB_HOST=mysqldb
+      - DB_USER=basic_user
+      - DB_PASSWORD=1234asdf*
+      - DB_NAME=nodejs_project
+    ports:
+      - 8080:8080
+    networks:
+      - auth-networks
+    command: npm start
+
+networks:
+  auth-networks:
+    driver: bridge
